@@ -1,0 +1,61 @@
+version: "3"
+services:
+  nginx:
+    container_name: nginx
+    image: nginx:latest
+    restart: always
+    networks:
+      - application_network
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx:/etc/nginx/conf.d
+      - .:/var/www
+      - ./docker/logs:/var/log/nginx
+    links:
+      - php
+
+  php:
+    container_name: php
+    restart: always
+    networks:
+      - application_network
+    build:
+      ./docker/images/php
+    volumes:
+      - .:/var/www:cached
+    links:
+      - db
+    depends_on:
+      - db
+
+  db:
+    container_name: db
+    image: mariadb:10.3
+    restart: always
+    networks:
+      - application_network
+    expose:
+      - 3306
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: slim
+      MYSQL_USER: slim
+      MYSQL_PASSWORD: test
+      MYSQL_ROOT_PASSWORD: test
+    volumes:
+      - db:/var/lib/mysql
+
+volumes:
+  db:
+    external: true
+
+networks:
+  application_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.18.0/24
