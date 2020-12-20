@@ -5,6 +5,11 @@ RUN rm -rf /var/cache/apk/* && \
 
 RUN apk update && apk add unzip
 
+# Install Postgre PDO
+RUN apk update && apk add postgresql-dev \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo pdo_pgsql pgsql
+
 # git client, mysql-client
 RUN apk add --update --no-cache git mysql-client bash htop
 

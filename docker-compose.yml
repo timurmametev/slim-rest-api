@@ -32,21 +32,18 @@ services:
 
   db:
     container_name: db
-    image: mariadb:10.3
+    image: postgres:12.2-alpine
     restart: always
     networks:
       - application_network
-    expose:
-      - 3306
-    ports:
-      - 3306:3306
     environment:
-      MYSQL_DATABASE: slim
-      MYSQL_USER: slim
-      MYSQL_PASSWORD: test
-      MYSQL_ROOT_PASSWORD: test
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - db:/var/lib/mysql
+      - db:/var/lib/postgresql/volumes
+    ports:
+      - "54321:5432"
 
 volumes:
   db:
