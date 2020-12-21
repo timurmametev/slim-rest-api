@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Provider;
 
+use App\Middleware\CorsMiddleware;
 use App\Support\Config;
 use App\Support\NotFoundHandler;
 use App\Support\ServiceProviderInterface;
@@ -91,6 +92,10 @@ class AppProvider implements ServiceProviderInterface
                 $container->get(RouteResolverInterface::class),
                 $container->get(RouteParserInterface::class)
             );
+        });
+
+        $container->set(CorsMiddleware::class, function (Container $container) {
+            return new CorsMiddleware();
         });
     }
 }

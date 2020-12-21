@@ -16,7 +16,7 @@ return [
                 'password' => 'root',
                 'charset' => 'utf-8'
             ],
-            'metadata_dirs' => ['./app/Web/entities'],
+            'metadata_dirs' => ['./app/Web/doctrine/entity'],
         ],
     ],
 ];

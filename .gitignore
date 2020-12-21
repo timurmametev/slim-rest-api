@@ -1,3 +1,4 @@
 /vendor/*
 /docker/logs
 /config/app.local.ini
+/var/doctrine/*

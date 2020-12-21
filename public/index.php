@@ -6,6 +6,7 @@ declare(strict_types=1);
  * @var $container ContainerInterface
  */
 
+use App\Middleware\CorsMiddleware;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Slim\App;
@@ -29,6 +30,7 @@ $app = new App(
     $container->get(RouteResolverInterface::class)
 );
 
+$app->add($container->get(CorsMiddleware::class));
 $app->add($container->get(RoutingMiddleware::class));
 $app->add($container->get(ErrorMiddleware::class));
 $app->run($request);

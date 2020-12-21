@@ -7,12 +7,14 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'vendor' . DIRECTORY_SEPARATOR . 'a
 $doctrine = require __DIR__ . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'doctrine.php';
 
 use App\Provider\ApiProvider;
+use App\Provider\DoctrineProvider;
 use App\Provider\WebProvider;
 use App\Support\ServiceProviderInterface;
 use App\Provider\AppProvider;
 use App\Support\Config;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\Cache\FilesystemCache;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Mapping\Driver\AnnotationDriver;
 use Doctrine\ORM\Tools\Setup;
@@ -26,7 +28,8 @@ $config = new Config(__DIR__ . DIRECTORY_SEPARATOR . 'config', $env, __DIR__);
 $providers = [
     AppProvider::class,
     WebProvider::class,
-    ApiProvider::class
+    ApiProvider::class,
+    DoctrineProvider::class
 ];
 
 $container = new Container([
@@ -70,5 +73,10 @@ $container->set(EntityManager::class, function () use ($doctrine) {
         $config
     );
 });
+
+Type::addType(
+    \Ramsey\Uuid\Doctrine\UuidType::NAME,
+    \Ramsey\Uuid\Doctrine\UuidType::class
+);
 
 return $container;
