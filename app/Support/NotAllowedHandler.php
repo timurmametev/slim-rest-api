@@ -8,9 +8,10 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\Interfaces\ErrorHandlerInterface;
+use Slim\Routing\RouteContext;
 use Throwable;
 
-class NotFoundHandler implements ErrorHandlerInterface
+class NotAllowedHandler implements ErrorHandlerInterface
 {
     /**
      * @var ResponseFactoryInterface
@@ -43,10 +44,15 @@ class NotFoundHandler implements ErrorHandlerInterface
         bool $logErrorDetails
     ): ResponseInterface
     {
-        $response = $this->factory->createResponse(404);
-        $response->getBody()->write('404 Not Found');
+        $routeContext = RouteContext::fromRequest($request);
+        $routingResults = $routeContext->getRoutingResults();
+        $methods = $routingResults->getAllowedMethods();
+
+        $response = $this->factory->createResponse(405);
+        $response->getBody()->write('Method must be one of: ' . implode(', ', $methods));
 
         return $response
+            ->withHeader('Allow', implode(', ', $methods))
             ->withHeader('Content-type', 'text/html');
     }
 }

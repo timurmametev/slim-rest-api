@@ -6,7 +6,7 @@ return [
     'config' => [
         'doctrine' => [
             'dev_mode' => true,
-            'cache_dir' => './var/doctrine',
+            'cache_dir' => __DIR__ . '/../var/doctrine',
             'connection' => [
                 'driver' => 'pdo_pgsql',
                 'host' => 'db',
@@ -16,7 +16,7 @@ return [
                 'password' => 'root',
                 'charset' => 'utf-8'
             ],
-            'metadata_dirs' => ['./app/Web/doctrine/entity'],
+            'metadata_dirs' => [__DIR__ . '/../app/Web/doctrine/entity'],
         ],
     ],
 ];

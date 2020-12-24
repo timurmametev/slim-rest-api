@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\ORMException;
 use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\UuidInterface;
 
 class ConsumerRepository
 {
@@ -16,7 +17,7 @@ class ConsumerRepository
     private EntityManager $em;
 
     /**
-     * ConsumerRepository constructor.
+     * ConsumerDataManager constructor.
      *
      * @param EntityRepository $repository
      * @param EntityManager $em
@@ -28,10 +29,10 @@ class ConsumerRepository
     }
 
     /**
-     * @param Uuid $id
+     * @param UuidInterface $id
      * @return Consumer|object|null
      */
-    public function get(Uuid $id): ?Consumer
+    public function get(UuidInterface $id): ?Consumer
     {
         return $this->repository->find($id->toString());
     }
@@ -43,6 +44,7 @@ class ConsumerRepository
     public function add(Consumer $consumer): void
     {
         $this->em->persist($consumer);
+        $this->em->flush();
     }
 
     /**

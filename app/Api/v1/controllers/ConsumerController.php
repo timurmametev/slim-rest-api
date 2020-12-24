@@ -4,13 +4,66 @@ declare(strict_types=1);
 
 namespace App\Api\v1\controllers;
 
+use App\Api\v1\helpers\ResponseHelper;
+use App\Api\v1\services\ConsumerService;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use ReflectionException;
 
 class ConsumerController
 {
-    public function index(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    private ConsumerService $service;
+
+    /**
+     * ConsumerController constructor.
+     *
+     * @param ConsumerService $service
+     */
+    public function __construct(ConsumerService $service)
     {
+        $this->service = $service;
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args
+     * @return ResponseInterface
+     * @throws ReflectionException
+     */
+    public function identity(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    {
+        $responseDTO = $this->service->getConsumerByIdentity($args);
+
+        return ResponseHelper::successResponse($response, $responseDTO);
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws ReflectionException
+     */
+    public function create(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        $responseDTO = $this->service->createConsumer($request->getParsedBody());
+
+        return ResponseHelper::successResponse($response, $responseDTO);
+    }
+
+    public function group(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        var_dump(123); exit();
+        $response->getBody()->write('Hello!');
+
+        return $response
+            ->withStatus(200)
+            ->withHeader('Content-Type', 'application/json');
+    }
+
+    public function delete(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    {
+        var_dump(123); exit();
         $response->getBody()->write('Hello!');
 
         return $response

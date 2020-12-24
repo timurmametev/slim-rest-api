@@ -54,6 +54,14 @@ class Consumer
     }
 
     /**
+     * @param UuidInterface $id
+     */
+    public function setId(UuidInterface $id): void
+    {
+        $this->id = $id;
+    }
+
+    /**
      * @param string $group
      */
     public function setGroup(string $group): void

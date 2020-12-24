@@ -13,6 +13,7 @@ use Slim\App;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteResolverInterface;
+use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
 use Slim\Psr7\Factory\ServerRequestFactory;
@@ -30,6 +31,7 @@ $app = new App(
     $container->get(RouteResolverInterface::class)
 );
 
+$app->add($container->get(BodyParsingMiddleware::class));
 $app->add($container->get(CorsMiddleware::class));
 $app->add($container->get(RoutingMiddleware::class));
 $app->add($container->get(ErrorMiddleware::class));

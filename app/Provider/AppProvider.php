@@ -6,16 +6,19 @@ namespace App\Provider;
 
 use App\Middleware\CorsMiddleware;
 use App\Support\Config;
+use App\Support\NotAllowedHandler;
 use App\Support\NotFoundHandler;
 use App\Support\ServiceProviderInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Slim\CallableResolver;
+use Slim\Exception\HttpMethodNotAllowedException;
 use Slim\Exception\HttpNotFoundException;
 use Slim\Interfaces\CallableResolverInterface;
 use Slim\Interfaces\RouteCollectorInterface;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Interfaces\RouteResolverInterface;
+use Slim\Middleware\BodyParsingMiddleware;
 use Slim\Middleware\ErrorMiddleware;
 use Slim\Middleware\RoutingMiddleware;
 use Slim\Psr7\Factory\ResponseFactory;
@@ -76,6 +79,10 @@ class AppProvider implements ServiceProviderInterface
             return new NotFoundHandler($container->get(ResponseFactoryInterface::class));
         });
 
+        $container->set(NotAllowedHandler::class, function (ContainerInterface $container) {
+            return new NotAllowedHandler($container->get(ResponseFactoryInterface::class));
+        });
+
         $container->set(ErrorMiddleware::class, function (ContainerInterface $container) {
             $middleware = new ErrorMiddleware(
                 $container->get(CallableResolverInterface::class),
@@ -84,6 +91,7 @@ class AppProvider implements ServiceProviderInterface
                 true,
                 true);
             $middleware->setErrorHandler(HttpNotFoundException::class, $container->get(NotFoundHandler::class));
+            $middleware->setErrorHandler(HttpMethodNotAllowedException::class, $container->get(NotAllowedHandler::class));
             return $middleware;
         });
 
@@ -94,8 +102,12 @@ class AppProvider implements ServiceProviderInterface
             );
         });
 
-        $container->set(CorsMiddleware::class, function (Container $container) {
+        $container->set(CorsMiddleware::class, function () {
             return new CorsMiddleware();
+        });
+
+        $container->set(BodyParsingMiddleware::class, function () {
+            return new BodyParsingMiddleware();
         });
     }
 }
