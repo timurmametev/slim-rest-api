@@ -25,7 +25,7 @@ class Consumer
     /**
      * @var string
      *
-     * @ORM\Column(type="string", length=50, nullable=false)
+     * @ORM\Column(name="group_name", type="string", length=50, nullable=false)
      */
     private string $group;
 

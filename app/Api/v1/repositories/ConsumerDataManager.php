@@ -6,10 +6,14 @@ namespace App\Api\v1\repositories;
 
 use App\Api\v1\dto\RequestParamsDTO;
 use App\Api\v1\dto\ValidateDTO;
+use App\Web\common\collection\CollectionFactory;
+use App\Web\common\collection\CollectionTemplate;
 use App\Web\doctrine\entity\Consumer;
 use App\Web\doctrine\repository\ConsumerRepository;
 use App\Web\dto\ConsumerDTO;
 use Doctrine\ORM\ORMException;
+use Exception;
+use ReflectionException;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Regex;
@@ -62,14 +66,51 @@ class ConsumerDataManager
 
     /**
      * @param RequestParamsDTO $paramsDTO
+     * @return CollectionTemplate
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function getByGroup(RequestParamsDTO $paramsDTO): CollectionTemplate
+    {
+        $consumers = $this->repository->getByGroupName($paramsDTO->group);
+
+        $collection = CollectionFactory::newCollection(
+            CollectionFactory::getObjectFullName(
+                new ConsumerDTO()
+            )
+        );
+
+        foreach ($consumers as $consumer) {
+            $collection->addData([
+                'id'    => $consumer->getId(),
+                'group' => $consumer->getGroup()
+            ]);
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @param RequestParamsDTO $paramsDTO
      * @throws ORMException
      */
-    public function createConsumer(RequestParamsDTO $paramsDTO)
+    public function createEntry(RequestParamsDTO $paramsDTO): void
     {
         $consumer = new Consumer();
         $consumer->setId($paramsDTO->id);
         $consumer->setGroup($paramsDTO->group);
         $this->repository->add($consumer);
+    }
+
+    /**
+     * @param RequestParamsDTO $paramsDTO
+     * @throws ORMException
+     */
+    public function deleteEntry(RequestParamsDTO $paramsDTO): void
+    {
+        $this->repository->delete(
+            $this->repository->get($paramsDTO->id)
+        );
     }
 
     /**

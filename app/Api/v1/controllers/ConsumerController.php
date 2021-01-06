@@ -31,10 +31,13 @@ class ConsumerController
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function identity(ServerRequestInterface $request, ResponseInterface $response, array $args): ResponseInterface
+    public function identity(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface
     {
         $responseDTO = $this->service->getConsumerByIdentity($args);
-
         return ResponseHelper::successResponse($response, $responseDTO);
     }
 
@@ -44,30 +47,44 @@ class ConsumerController
      * @return ResponseInterface
      * @throws ReflectionException
      */
-    public function create(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    public function create(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ): ResponseInterface
     {
         $responseDTO = $this->service->createConsumer($request->getParsedBody());
-
         return ResponseHelper::successResponse($response, $responseDTO);
     }
 
-    public function group(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @return ResponseInterface
+     * @throws ReflectionException
+     */
+    public function group(
+        ServerRequestInterface $request,
+        ResponseInterface $response
+    ): ResponseInterface
     {
-        var_dump(123); exit();
-        $response->getBody()->write('Hello!');
-
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json');
+        $responseDTO = $this->service->getConsumersByGroup($request->getQueryParams());
+        return ResponseHelper::successResponse($response, $responseDTO);
     }
 
-    public function delete(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
+    /**
+     * @param ServerRequestInterface $request
+     * @param ResponseInterface $response
+     * @param array $args
+     * @return ResponseInterface
+     * @throws ReflectionException
+     */
+    public function delete(
+        ServerRequestInterface $request,
+        ResponseInterface $response,
+        array $args
+    ): ResponseInterface
     {
-        var_dump(123); exit();
-        $response->getBody()->write('Hello!');
-
-        return $response
-            ->withStatus(200)
-            ->withHeader('Content-Type', 'application/json');
+        $responseDTO = $this->service->deleteConsumer($args);
+        return ResponseHelper::successResponse($response, $responseDTO);
     }
 }

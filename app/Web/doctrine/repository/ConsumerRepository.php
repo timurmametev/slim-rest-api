@@ -7,8 +7,8 @@ namespace App\Web\doctrine\repository;
 use App\Web\doctrine\entity\Consumer;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class ConsumerRepository
@@ -54,5 +54,15 @@ class ConsumerRepository
     public function getByGroupName(string $group): array
     {
         return $this->repository->findBy(['group' => $group]);
+    }
+
+    /**
+     * @param Consumer $consumer
+     * @throws ORMException
+     */
+    public function delete(Consumer $consumer): void
+    {
+        $this->em->remove($consumer);
+        $this->em->flush();
     }
 }

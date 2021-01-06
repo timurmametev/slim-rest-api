@@ -11,10 +11,9 @@ use App\Api\v1\helpers\ResponseHelper;
 use App\Api\v1\repositories\ConsumerDataManager;
 use App\Web\common\collection\CollectionFactory;
 use App\Web\common\collection\CollectionTemplate;
-use Doctrine\ORM\ORMException;
 use Exception;
-use Psr\Http\Message\ServerRequestInterface;
 use ReflectionException;
+use Throwable;
 
 class ConsumerService
 {
@@ -40,16 +39,10 @@ class ConsumerService
     {
         $paramsDTO = new RequestParamsDTO($args);
 
-        $collection = CollectionFactory::newCollection(
-            CollectionFactory::getObjectFullName(
-                new ValidateDTO()
-            )
-        );
+        $validation = $this->paramsValidation($paramsDTO);
 
-        $collection->addData($this->repository->identityValidator($paramsDTO));
-
-        if ($messages = $this->handleErrors($collection)) {
-            return ResponseHelper::errorResponse($messages, 400);
+        if ($validation) {
+            return ResponseHelper::errorResponse($validation, 400);
         }
 
         $consumer = $this->repository->getByIdentity($paramsDTO);
@@ -61,6 +54,30 @@ class ConsumerService
         return new ResponseDTO([
             'code' => 200,
             'response' => $consumer->getData()
+        ]);
+    }
+
+    /**
+     * @param array $params
+     * @return ResponseDTO
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function getConsumersByGroup(array $params): ResponseDTO
+    {
+        $paramsDTO = new RequestParamsDTO($params);
+
+        $validation = $this->paramsValidation($paramsDTO);
+
+        if ($validation) {
+            return ResponseHelper::errorResponse($validation, 400);
+        }
+
+        $consumers = $this->repository->getByGroup($paramsDTO);
+
+        return new ResponseDTO([
+            'code' => 200,
+            'response' => $consumers->getData()
         ]);
     }
 
@@ -78,17 +95,10 @@ class ConsumerService
 
         $paramsDTO = new RequestParamsDTO($params);
 
-        $collection = CollectionFactory::newCollection(
-            CollectionFactory::getObjectFullName(
-                new ValidateDTO()
-            )
-        );
+        $validation = $this->paramsValidation($paramsDTO);
 
-        $collection->addData($this->repository->identityValidator($paramsDTO));
-        $collection->addData($this->repository->groupValidator($paramsDTO));
-
-        if ($messages = $this->handleErrors($collection)) {
-            return ResponseHelper::errorResponse($messages, 400);
+        if ($validation) {
+            return ResponseHelper::errorResponse($validation, 400);
         }
 
         $consumer = $this->repository->getByIdentity($paramsDTO);
@@ -101,8 +111,8 @@ class ConsumerService
         }
 
         try {
-            $this->repository->createConsumer($paramsDTO);
-        } catch (ORMException $exception) {
+            $this->repository->createEntry($paramsDTO);
+        } catch (Throwable $exception) {
             return new ResponseDTO([
                 'code' => 500,
                 'response' => $exception->getMessage()
@@ -113,6 +123,68 @@ class ConsumerService
             'code' => 201,
             'response' => []
         ]);
+    }
+
+    /**
+     * @param array $args
+     * @return ResponseDTO
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function deleteConsumer(array $args): ResponseDTO
+    {
+        $paramsDTO = new RequestParamsDTO($args);
+
+        $validation = $this->paramsValidation($paramsDTO);
+
+        if ($validation) {
+            return ResponseHelper::errorResponse($validation, 400);
+        }
+
+        $consumer = $this->repository->getByIdentity($paramsDTO);
+
+        if (!$consumer->id) {
+            return ResponseHelper::notFoundResponse();
+        }
+
+        try {
+            $this->repository->deleteEntry($paramsDTO);
+        } catch (Throwable $exception) {
+            return new ResponseDTO([
+                'code' => 500,
+                'response' => $exception->getMessage()
+            ]);
+        }
+
+        return new ResponseDTO([
+            'code' => 200,
+            'response' => []
+        ]);
+    }
+
+    /**
+     * @param RequestParamsDTO $paramsDTO
+     * @return array
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    private function paramsValidation(RequestParamsDTO $paramsDTO): array
+    {
+        $collection = CollectionFactory::newCollection(
+            CollectionFactory::getObjectFullName(
+                new ValidateDTO()
+            )
+        );
+
+        if ($paramsDTO->id) {
+            $collection->addData($this->repository->identityValidator($paramsDTO));
+        }
+
+        if ($paramsDTO->group) {
+            $collection->addData($this->repository->groupValidator($paramsDTO));
+        }
+
+        return $this->handleErrors($collection);
     }
 
 
