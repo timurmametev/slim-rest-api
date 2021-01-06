@@ -6,11 +6,10 @@ namespace App\Api\v1\services;
 
 use App\Api\v1\dto\RequestParamsDTO;
 use App\Api\v1\dto\ResponseDTO;
-use App\Api\v1\dto\ValidateDTO;
+use App\Api\v1\dto\ValidateErrorDTO;
 use App\Api\v1\helpers\ResponseHelper;
 use App\Api\v1\repositories\ConsumerDataManager;
 use App\Web\common\collection\CollectionFactory;
-use App\Web\common\collection\CollectionTemplate;
 use Exception;
 use ReflectionException;
 use Throwable;
@@ -61,11 +60,43 @@ class ConsumerService
      * @param array $params
      * @return ResponseDTO
      * @throws ReflectionException
+     */
+    public function getConsumers(array $params): ResponseDTO
+    {
+        if (empty($params)) {
+            return $this->getAllConsumers();
+        }
+
+        return $this->getConsumersByGroup($params);
+    }
+
+    /**
+     * @return ResponseDTO
+     * @throws ReflectionException
+     */
+    public function getAllConsumers(): ResponseDTO
+    {
+        $consumers = $this->repository->getAll();
+
+        return new ResponseDTO([
+            'code' => 200,
+            'response' => $consumers->getData()
+        ]);
+    }
+
+    /**
+     * @param array $params
+     * @return ResponseDTO
+     * @throws ReflectionException
      * @throws Exception
      */
     public function getConsumersByGroup(array $params): ResponseDTO
     {
         $paramsDTO = new RequestParamsDTO($params);
+
+        if (!$paramsDTO->group) {
+            return ResponseHelper::errorResponse(['Parameter group is empty'], 400);
+        }
 
         $validation = $this->paramsValidation($paramsDTO);
 
@@ -172,37 +203,24 @@ class ConsumerService
     {
         $collection = CollectionFactory::newCollection(
             CollectionFactory::getObjectFullName(
-                new ValidateDTO()
+                new ValidateErrorDTO()
             )
         );
 
         if ($paramsDTO->id) {
-            $collection->addData($this->repository->identityValidator($paramsDTO));
+            $collection->addData(
+                $this->repository->identityValidator($paramsDTO),
+                true
+            );
         }
 
         if ($paramsDTO->group) {
-            $collection->addData($this->repository->groupValidator($paramsDTO));
+            $collection->addData(
+                $this->repository->groupValidator($paramsDTO),
+                true
+            );
         }
 
-        return $this->handleErrors($collection);
-    }
-
-
-    /**
-     * @param CollectionTemplate $collection
-     * @return array
-     */
-    private function handleErrors(CollectionTemplate $collection): array
-    {
-        $messages = [];
-
-        foreach ($collection->getData(false) as $item) {
-            /** @var $item ValidateDTO */
-            if ($item->messages) {
-                $messages[] = $item->messages;
-            }
-        }
-
-        return $messages;
+        return $collection->getData();
     }
 }

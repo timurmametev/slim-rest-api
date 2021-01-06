@@ -7,14 +7,16 @@ namespace App\Api\v1\dto;
 use App\Web\common\dto\BaseDTO;
 
 /**
- * Class ValidateDTO
+ * Class ValidateErrorDTO
  * @package App\Api\v1\dto
  *
- * @property array $messages
+ * @property string $parameter
+ * @property string $message
  */
-class ValidateDTO extends BaseDTO
+class ValidateErrorDTO extends BaseDTO
 {
     protected array $attributeNames = [
-        'messages'
+        'parameter',
+        'message'
     ];
 }

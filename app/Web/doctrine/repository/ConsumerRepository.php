@@ -38,6 +38,14 @@ class ConsumerRepository
     }
 
     /**
+     * @return Consumer[]
+     */
+    public function getAll(): array
+    {
+        return $this->repository->findAll();
+    }
+
+    /**
      * @param Consumer $consumer
      * @throws ORMException
      */

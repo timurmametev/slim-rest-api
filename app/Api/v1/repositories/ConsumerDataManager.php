@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Api\v1\repositories;
 
 use App\Api\v1\dto\RequestParamsDTO;
-use App\Api\v1\dto\ValidateDTO;
+use App\Api\v1\dto\ValidateErrorDTO;
 use App\Web\common\collection\CollectionFactory;
 use App\Web\common\collection\CollectionTemplate;
 use App\Web\doctrine\entity\Consumer;
@@ -44,6 +44,31 @@ class ConsumerDataManager
     {
         $this->validator = Validation::createValidator();
         $this->repository = $repository;
+    }
+
+    /**
+     * @return CollectionTemplate
+     * @throws ReflectionException
+     * @throws Exception
+     */
+    public function getAll(): CollectionTemplate
+    {
+        $consumers = $this->repository->getAll();
+
+        $collection = CollectionFactory::newCollection(
+            CollectionFactory::getObjectFullName(
+                new ConsumerDTO()
+            )
+        );
+
+        foreach ($consumers as $consumer) {
+            $collection->addData([
+                'id'    => $consumer->getId(),
+                'group' => $consumer->getGroup()
+            ]);
+        }
+
+        return $collection;
     }
 
     /**
@@ -116,6 +141,7 @@ class ConsumerDataManager
     /**
      * @param RequestParamsDTO $paramsDTO
      * @return array
+     * @throws ReflectionException
      */
     public function identityValidator(RequestParamsDTO $paramsDTO): array
     {
@@ -130,6 +156,7 @@ class ConsumerDataManager
     /**
      * @param RequestParamsDTO $paramsDTO
      * @return array
+     * @throws ReflectionException
      */
     public function groupValidator(RequestParamsDTO $paramsDTO): array
     {
@@ -151,23 +178,27 @@ class ConsumerDataManager
      * @param ConstraintViolationListInterface $errors
      * @param string $parameter
      * @return array
+     * @throws ReflectionException
+     * @throws Exception
      */
     private function processErrors(ConstraintViolationListInterface $errors, string $parameter): array
     {
-        $messages = [];
+        $collection = CollectionFactory::newCollection(
+            CollectionFactory::getObjectFullName(
+                new ValidateErrorDTO()
+            )
+        );
 
         if ($errors->count()) {
             foreach ($errors as $error) {
                 /** @var $error ConstraintViolation */
-                $messages[] = [
+                $collection->addData([
                     'parameter' => $parameter,
                     'message' => $error->getMessage()
-                ];
+                ]);
             }
         }
 
-        return [
-            'messages' => $messages
-        ];
+        return $collection->getData();
     }
 }

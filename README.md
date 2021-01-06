@@ -31,6 +31,10 @@ php vendor/bin/doctrine-migrations migrate
 
 ## Api Methods
 
+* Get All Consumers
+```bash
+GET /api/v1/consumers
+```
 * Get Consumer by identity (UUID)
 ```bash
 GET /api/v1/consumers/{UUID}

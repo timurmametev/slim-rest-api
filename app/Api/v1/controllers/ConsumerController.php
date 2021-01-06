@@ -67,7 +67,7 @@ class ConsumerController
         ResponseInterface $response
     ): ResponseInterface
     {
-        $responseDTO = $this->service->getConsumersByGroup($request->getQueryParams());
+        $responseDTO = $this->service->getConsumers($request->getQueryParams());
         return ResponseHelper::successResponse($response, $responseDTO);
     }
 
