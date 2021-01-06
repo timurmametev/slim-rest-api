@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20201220195432 extends AbstractMigration
+final class Version20210106152611 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -20,7 +20,7 @@ final class Version20201220195432 extends AbstractMigration
     public function up(Schema $schema) : void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('CREATE TABLE consumer (id UUID NOT NULL, "group" VARCHAR(50) NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE consumer (id UUID NOT NULL, group_name VARCHAR(50) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('COMMENT ON COLUMN consumer.id IS \'(DC2Type:uuid)\'');
     }
 
